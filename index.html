@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zeit-Animation</title>
+    <style>
+        #timeDisplay {
+            font-size: 2em;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+<div id="timeDisplay">03:00</div>
+
+<script>
+    function timeToSeconds(time) {
+        const [minutes, seconds] = time.split(':').map(Number);
+        return minutes * 60 + seconds;
+    }
+
+    function secondsToTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return String(minutes).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+    }
+
+    function animateTime(start, end) {
+        const startSeconds = timeToSeconds(start);
+        const endSeconds = timeToSeconds(end);
+        const duration = 3000;
+        const increment = startSeconds < endSeconds ? 1 : -1;
+        const totalSteps = Math.abs(endSeconds - startSeconds);
+        let startTime = null;
+
+        function exponentialEaseOut(t) {
+            return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+        }
+
+        function animateStep(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const elapsed = timestamp - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easing = exponentialEaseOut(progress);
+            const current = Math.round(startSeconds + easing * totalSteps * increment);
+
+            document.getElementById('timeDisplay').textContent = secondsToTime(current);
+
+            if (progress < 1) {
+                requestAnimationFrame(animateStep);
+            }
+        }
+
+        requestAnimationFrame(animateStep);
+    }
+
+    setTimeout(() => {
+        animateTime("03:00", "01:30");
+    }, 1000);
+</script>
+
+</body>
+</html>
